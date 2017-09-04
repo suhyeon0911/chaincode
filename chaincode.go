@@ -351,7 +351,7 @@ func (t *SimpleChaincode) transferProperty(stub shim.ChaincodeStubInterface, arg
 			return shim.Error("Property does not exist")
 		}
 
-		propertyToTransfer := contract{}
+		propertyToTransfer := property{}
 		err = json.Unmarshal(propertyAsBytes, &propertyToTransfer) //unmarshal it aka JSON.parse()
 		if err != nil {
 			return shim.Error(err.Error())
