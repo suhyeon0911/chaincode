@@ -288,7 +288,7 @@ func (t *SimpleChaincode) CreateContract(stub shim.ChaincodeStubInterface, args 
 
 	// ==== Create contract object and marshal to JSON ====
 	objectType := "contract"
-	contract := &conditionOfContract{objectType, contractNum, propertyNum}
+	contract := &contract{objectType, contractNum, propertyNum}
 	contractJSONasBytes, err := json.Marshal(contract)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -319,10 +319,10 @@ func (t *SimpleChaincode) readValue(stub shim.ChaincodeStubInterface, args []str
 	key = args[0]
 	valAsbytes, err := stub.GetState(key)
 	if err != nil {
-		jsonResp = "{\"Error\":\"Failed to get value for " + name + "\"}"
+		jsonResp = "{\"Error\":\"Failed to get value for " + key + "\"}"
 		return shim.Error(jsonResp)
 	} else if valAsbytes == nil {
-		jsonResp = "{\"Error\":\"Value does not exist: " + name + "\"}"
+		jsonResp = "{\"Error\":\"Value does not exist: " + key + "\"}"
 		return shim.Error(jsonResp)
 	}
 
@@ -351,7 +351,7 @@ func (t *SimpleChaincode) transferProperty(stub shim.ChaincodeStubInterface, arg
 			return shim.Error("Property does not exist")
 		}
 
-		propertyToTransfer := marble{}
+		propertyToTransfer := contract{}
 		err = json.Unmarshal(propertyAsBytes, &propertyToTransfer) //unmarshal it aka JSON.parse()
 		if err != nil {
 			return shim.Error(err.Error())
