@@ -288,7 +288,7 @@ func (t *SimpleChaincode) CreateContract(stub shim.ChaincodeStubInterface, args 
 
 	// ==== Create contract object and marshal to JSON ====
 	objectType := "contract"
-	contract := &conditionOfContract{objectType, conditionNum, propertyNum, seller, buyer, deposit}
+	contract := &conditionOfContract{objectType, contractNum, propertyNum}
 	contractJSONasBytes, err := json.Marshal(contract)
 	if err != nil {
 		return shim.Error(err.Error())
