@@ -194,7 +194,7 @@ func (t *SimpleChaincode) initProperty(stub shim.ChaincodeStubInterface, args []
 	propertyJSONasBytes, err := json.Marshal(property)
 	if err != nil {
 		return shim.Error(err.Error())
-
+	}
 	// === Save object to state ===
 	err = stub.PutState(propertyNum, propertyJSONasBytes)
 	if err != nil {
