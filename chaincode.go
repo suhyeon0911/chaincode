@@ -90,28 +90,28 @@ type SimpleChaincode struct {
 
 // 매물
 type property struct {
-	ObjectType         string `json:"docType"` //docType is used to distinguish the various types of objects in state database
-	Property_num       int `json:"property_num"`    //the fieldtags are needed to keep case from bouncing around
-	Name							 string `json:"name"`
-	Address            string `json:"address"`
-	Owner              string    `json:"owner"`
+	ObjectType			string `json:"docType"` //docType is used to distinguish the various types of objects in state database
+	Property_num		string `json:"property_num"`    //the fieldtags are needed to keep case from bouncing around
+	Name						string `json:"name"`
+	Address					string `json:"address"`
+	Owner						string    `json:"owner"`
 }
 
 // 계약 조건
 type conditionOfContract struct {
-	ObjectType         string `json:"docType"` //docType is used to distinguish the various types of objects in state database
-	Condition_num       int `json:"condition_num"`    //the fieldtags are needed to keep case from bouncing around
-	Property_num       int `json:"property_num"`
-	Seller             string `json:"seller"`
-  Buyer              string `json:"buyer"`
-  Deposit            int `json:"deposit"`
+	ObjectType				string `json:"docType"` //docType is used to distinguish the various types of objects in state database
+	Condition_num			string `json:"condition_num"`    //the fieldtags are needed to keep case from bouncing around
+	Property_num			string `json:"property_num"`
+	Seller						string `json:"seller"`
+  Buyer							string `json:"buyer"`
+  Deposit						int `json:"deposit"`
 }
 
 // 계약서
 type contract struct {
-	ObjectType         string `json:"docType"` //docType is used to distinguish the various types of objects in state database
-	Contract_num       int `json:"contract_num"`    //the fieldtags are needed to keep case from bouncing around
-	Condition_num      int `json:"condition_num"`
+	ObjectType				string `json:"docType"` //docType is used to distinguish the various types of objects in state database
+	Contract_num			string `json:"contract_num"`    //the fieldtags are needed to keep case from bouncing around
+	Condition_num			string `json:"condition_num"`
 }
 
 
