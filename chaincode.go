@@ -140,12 +140,16 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("invoke is running " + function)
 
 	// Handle different functions
-	if function == "initMarble" {
-		return t.initMarble(stub, args)
-	} else if function == "transferMarble" { //change owner of a specific property
-		return t.transferMarble(stub, args)
-	} else if function == "readMarble" {
-		return t.readMarble(stub, args)
+	if function == "initProperty" {
+		return t.initProperty(stub, args)
+	} else if function == "initConditon" {
+		return t.initConditon(stub, args)
+	} else if function == "CreateContract" {
+		return t.CreateContract(stub, args)
+	} else if function == "transferProperty" {
+		return t.transferProperty(stub, args)
+	} else if function == "readValue" {
+		return t.readValue(stub, args)
 	}
 
 	fmt.Println("invoke did not find func: " + function) //error
@@ -153,50 +157,43 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 // ============================================================
-// initContract
+// initProperty
 // ============================================================
-func (t *SimpleChaincode) initContract(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SimpleChaincode) initProperty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
 
+	// propertyNum, propertyName, address, owner
+	if len(args) != 4 {
+		return shim.Error("Incorrect number of arguments. Expecting 4")
+	}
+
+	// ==== Input sanitation ====
+	fmt.Println("- start init marble")
+	if len(args[0]) <= 0 {
+		return shim.Error("1st argument must be a non-empty string")
+	}
+	if len(args[1]) <= 0 {
+		return shim.Error("2nd argument must be a non-empty string")
+	}
+	if len(args[2]) <= 0 {
+		return shim.Error("3rd argument must be a non-empty string")
+	}
+	if len(args[3]) <= 0 {
+		return shim.Error("4th argument must be a non-empty string")
+	}
+
 	// property
-	propertyNum := 1
-	propertyName := "ISLAB"
-	address := "서울시 성북구"
-	owner := "A"
+	propertyNum := strings.ToLower(args[0])
+	propertyName := strings.ToLower(args[1])
+	address := strings.ToLower(args[2])
+	owner := strings.ToLower(args[3])
 
-	// conditon of contract
-	conditionNum := 1
-		  // propertyNum
-	seller := "A"
-	buyer := "B"
-	deposit := 5000000
-
-	// contract
-	contractNum := 1
-		// conditionNum
-
-	// ==== Create property, condition of contract, contract object and marshal to JSON ====
-	// property object
+	// ==== Create property object and marshal to JSON ====
 	objectType := "property"
 	property := &property{objectType, propertyNum, propertyName, address, owner}
 	propertyJSONasBytes, err := json.Marshal(property)
 	if err != nil {
 		return shim.Error(err.Error())
-
-	// condition of contract object
-	objectType = "conditionOfContract"
-	condition := &conditionOfContract{objectType, conditionNum, propertyNum, seller, buyer, deposit}
-	conditionJSONasBytes, err := json.Marshal(condition)
-	if err != nil {
-		return shim.Error(err.Error())
-
-	// contract object
-	objectType = "contract"
-	contract := &contract{objectType, contractNum, conditionNum}
-	contractJSONasBytes, err := json.Marshal(contract)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
 
 	// === Save object to state ===
 	err = stub.PutState(propertyNum, propertyJSONasBytes)
@@ -204,48 +201,131 @@ func (t *SimpleChaincode) initContract(stub shim.ChaincodeStubInterface, args []
 		return shim.Error(err.Error())
 	}
 
-	err = stub.PutState(conditionNum, conditionOfContractJSONasBytes)
+	// ==== Return success ====
+	fmt.Println("- end init Property")
+	return shim.Success(nil)
+}
+
+// ============================================================
+// initConditon
+// ============================================================
+func (t *SimpleChaincode) initConditon(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var err error
+
+	// conditionNum, propertyNum, seller, buyer, deposit
+	if len(args) != 5 {
+		return shim.Error("Incorrect number of arguments. Expecting 5")
+	}
+
+	// ==== Input sanitation ====
+	fmt.Println("- start init condition")
+	if len(args[0]) <= 0 {
+		return shim.Error("1st argument must be a non-empty string")
+	}
+	if len(args[1]) <= 0 {
+		return shim.Error("2nd argument must be a non-empty string")
+	}
+	if len(args[2]) <= 0 {
+		return shim.Error("3rd argument must be a non-empty string")
+	}
+	if len(args[3]) <= 0 {
+		return shim.Error("4th argument must be a non-empty string")
+	}
+	if len(args[4]) <= 0 {
+		return shim.Error("5th argument must be a non-empty string")
+	}
+
+	// condition
+	conditionNum := strings.ToLower(args[0])
+	propertyNum := strings.ToLower(args[1])
+	seller := strings.ToLower(args[2])
+	buyer := strings.ToLower(args[3])
+	deposit, err :=strconv.Atoi(args[4])
+	if err != nil {
+		return shim.Error("5th argument must be a numeric string")
+	}
+
+	// ==== Create condition object and marshal to JSON ====
+	objectType := "condition"
+	condition := &conditionOfContract{objectType, conditionNum, propertyNum, seller, buyer, deposit}
+	conditionJSONasBytes, err := json.Marshal(condition)
+	if err != nil {
+		return shim.Error(err.Error())
+
+	// === Save object to state ===
+	err = stub.PutState(conditionNum, conditionJSONasBytes)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
+	// ==== Return success ====
+	fmt.Println("- end init contract condition")
+	return shim.Success(nil)
+}
+
+// ============================================================
+// CreateContract
+// ============================================================
+func (t *SimpleChaincode) CreateContract(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var err error
+
+	// contractNum, conditionNum
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	// ==== Input sanitation ====
+	fmt.Println("- start init condition")
+	if len(args[0]) <= 0 {
+		return shim.Error("1st argument must be a non-empty string")
+	}
+	if len(args[1]) <= 0 {
+		return shim.Error("2nd argument must be a non-empty string")
+	}
+
+	// contract
+	contractNum := strings.ToLower(args[0])
+	propertyNum := strings.ToLower(args[1])
+
+	// ==== Create contract object and marshal to JSON ====
+	objectType := "contract"
+	contract := &conditionOfContract{objectType, conditionNum, propertyNum, seller, buyer, deposit}
+	contractJSONasBytes, err := json.Marshal(contract)
+	if err != nil {
+		return shim.Error(err.Error())
+
+	// === Save object to state ===
 	err = stub.PutState(contractNum, contractJSONasBytes)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
 	// ==== Return success ====
-	fmt.Println("- end init contract")
+	fmt.Println("- end create contract")
 	return shim.Success(nil)
 }
 
 // ===============================================
-// readMarble - read a marble from chaincode state
+// readValue - read a property, condition, contract from chaincode state
 // ===============================================
-func (t *SimpleChaincode) readProperty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var num, jsonResp string
+func (t *SimpleChaincode) readValue(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var key, jsonResp string
 	var err error
 
-	num = strconv.Atoi(args[0])
-
-	// === Create composit key ===
-	propertyCompositeKey, err := stub.CreateCompositeKey("property", "Property_num")
-	if err != nil {
-		return shim.Error("Failed to get marble:" + err.Error())
-	} else if propertyAsBytes == nil {
-		return shim.Error("Property does not exist")
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting number of the value to query")
 	}
 
-	valAsbytes, err := stub.GetStateByPartialCompositeKey(propertyCompositeKey)
-	/*
+	key = args[0]
+	valAsbytes, err := stub.GetState(key)
 	if err != nil {
-		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
+		jsonResp = "{\"Error\":\"Failed to get value for " + name + "\"}"
 		return shim.Error(jsonResp)
 	} else if valAsbytes == nil {
-		jsonResp = "{\"Error\":\"Marble does not exist: " + name + "\"}"
+		jsonResp = "{\"Error\":\"Value does not exist: " + name + "\"}"
 		return shim.Error(jsonResp)
 	}
-*/
+
 	return shim.Success(valAsbytes)
 }
 
@@ -254,40 +334,36 @@ func (t *SimpleChaincode) readProperty(stub shim.ChaincodeStubInterface, args []
 // ===========================================================
 func (t *SimpleChaincode) transferProperty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	if len(args) < 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
-	}
+		//   0       1
+		// "name", "bob"
+		if len(args) < 2 {
+			return shim.Error("Incorrect number of arguments. Expecting 2")
+		}
 
-	propertyNum := args[0]
-	newOwner := strings.ToLower(args[1])
-	fmt.Println("- start transferMarble ", propertyNum, newOwner)
+		propertyNum := args[0]
+		newOwner := strings.ToLower(args[1])
+		fmt.Println("- start transferProperty ", propertyNum, newOwner)
 
-	propertyCompositeKey, err := stub.CreateCompositeKey("property", "Property_num")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+		propertyAsBytes, err := stub.GetState(propertyNum)
+		if err != nil {
+			return shim.Error("Failed to get property:" + err.Error())
+		} else if propertyAsBytes == nil {
+			return shim.Error("Property does not exist")
+		}
 
-	propertyAsBytes, err := stub.GetStateByPartialCompositeKey(propertyCompositeKey)
+		propertyToTransfer := marble{}
+		err = json.Unmarshal(propertyAsBytes, &propertyToTransfer) //unmarshal it aka JSON.parse()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		propertyToTransfer.Owner = newOwner //change the owner
 
-	if err != nil {
-		return shim.Error("Failed to get marble:" + err.Error())
-	} else if propertyAsBytes == nil {
-		return shim.Error("Property does not exist")
-	}
+		propertyJSONasBytes, _ := json.Marshal(propertyToTransfer)
+		err = stub.PutState(propertyNum, propertyJSONasBytes) //rewrite the property
+		if err != nil {
+			return shim.Error(err.Error())
+		}
 
-	propertyToTransfer := property{}
-	err = json.Unmarshal(propertyAsBytes, &propertyToTransfer) //unmarshal it aka JSON.parse()
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-	propertyToTransfer.Owner = newOwner //change the owner
-
-	propertyJSONasBytes, _ := json.Marshal(propertyToTransfer)
-	err = stub.PutState(propertyNum, propertyJSONasBytes)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-
-	fmt.Println("- end transferProperty (success)")
-	return shim.Success(nil)
+		fmt.Println("- end transferProperty (success)")
+		return shim.Success(nil)
 }
