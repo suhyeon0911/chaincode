@@ -75,12 +75,10 @@ under the License.
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -251,6 +249,7 @@ func (t *SimpleChaincode) initConditon(stub shim.ChaincodeStubInterface, args []
 	conditionJSONasBytes, err := json.Marshal(condition)
 	if err != nil {
 		return shim.Error(err.Error())
+	}
 
 	// === Save object to state ===
 	err = stub.PutState(conditionNum, conditionJSONasBytes)
@@ -293,6 +292,7 @@ func (t *SimpleChaincode) CreateContract(stub shim.ChaincodeStubInterface, args 
 	contractJSONasBytes, err := json.Marshal(contract)
 	if err != nil {
 		return shim.Error(err.Error())
+	}
 
 	// === Save object to state ===
 	err = stub.PutState(contractNum, contractJSONasBytes)
